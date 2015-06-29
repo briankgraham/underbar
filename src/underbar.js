@@ -329,6 +329,10 @@
   //
   // Hint: Use Array.isArray to check if something is an array
   _.flatten = function(nestedArray, result) {
+    result = result || [];
+    return _.reduce(nestedArray, function(current, next){
+      return current.concat(Array.isArray(next) ? _.flatten(next, result) : next);
+    }, result);
   };
 
   // Takes an arbitrary number of arrays and produces an array that contains
