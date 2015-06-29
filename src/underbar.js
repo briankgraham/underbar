@@ -177,7 +177,7 @@
   _.every = function(collection, iterator) {
     // TIP: Try re-using reduce() here.
     iterator = iterator || _.identity;
-    
+
     return _.reduce(collection, function(current, next){
       return !current || !iterator(next) ? false : true;
     }, true);
@@ -187,6 +187,19 @@
   // provided, provide a default one
   _.some = function(collection, iterator) {
     // TIP: There's a very clever way to re-use every() here.
+    iterator = iterator || _.identity;
+
+    /** With Every
+    return !_.every(collection, function(item){
+      return !iterator(item);
+    }); */
+
+    /** With a loop */
+    var len = collection.length;
+    for (var i = 0; i < len; i++){
+      if (iterator(collection[i])) return true;
+    }
+    return false;
   };
 
 
