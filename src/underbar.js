@@ -177,6 +177,7 @@
   _.every = function(collection, iterator) {
     // TIP: Try re-using reduce() here.
     iterator = iterator || _.identity;
+    
     return _.reduce(collection, function(current, next){
       return !current || !iterator(next) ? false : true;
     }, true);
