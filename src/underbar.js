@@ -2,7 +2,7 @@
   'use strict';
 
   window._ = {};
-
+  
   // Returns whatever value is passed as the argument. This function doesn't
   // seem very useful, but remember it--if a function needs to provide an
   // iterator when the user does not pass one in, this will be handy.
@@ -96,7 +96,7 @@
   _.uniq = function(array) {
     var result = [];
     _.each(array, function(item){
-      if (_.indexOf(result, item) === -1){result.push(item);}
+      if (_.indexOf(result, item) === -1) {result.push(item);}
     });
     return result;
   };
@@ -177,9 +177,8 @@
   _.every = function(collection, iterator) {
     // TIP: Try re-using reduce() here.
     iterator = iterator || _.identity;
-
-    return _.reduce(collection, function(current, next){
-      return !current || !iterator(next) ? false : true;
+    return _.reduce(collection, function(wasFound, item){
+      return !wasFound || !iterator(item) ? false : true;
     }, true);
   };
 
@@ -235,7 +234,7 @@
   _.defaults = function(obj) {
     _.each(arguments, function(item){
       _.each(item, function(value, key){
-        if (typeof obj[key] === 'undefined') {obj[key] = value;}
+        if (!(key in obj)) {obj[key] = value;}
       });
     });
     return obj;
@@ -282,11 +281,10 @@
   // already computed the result for the given argument and return that value
   // instead if possible.
   _.memoize = function(func) {
-    var memo = {};
-    return function(){
-      var argz = Array.prototype.slice.call(arguments);
-      if (argz in memo){return memo[argz];}
-      else {return memo[argz] = func.apply(this, arguments);}
+    var memo = {}, argz;
+    return function() {
+      argz = Array.prototype.slice.call(arguments);
+      return argz in memo ? memo[argz] : memo[argz] = func.apply(this, argz); 
     };
   };
 
