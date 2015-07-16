@@ -316,14 +316,15 @@
   _.shuffle = function(array) {
     var newArr = array.slice(0),
         result = [], 
-        index;
+        index, store;
     
-    _.each(array, function(item){
+    return _.map(array, function(item){
       index = Math.floor(Math.random() * newArr.length);
-      result.push(newArr[index]);
+      store = newArr[index];
       newArr.splice(index, 1);
+      return store;
     });
-    return result;
+    
   };
 
 
@@ -338,7 +339,7 @@
   // Calls the method named by functionOrKey on each value in the list.
   // Note: You will need to learn a bit about .apply to complete this.
   _.invoke = function(collection, functionOrKey, args) {
-    var argz = Array.prototype.slice(args);
+    var argz = Array.prototype.slice(args, 2); // Whats the diff between slicing at 2 VS not including it at all? Both work...
     return _.map(collection, function(item){
       return typeof functionOrKey === 'function' ? functionOrKey.apply(item, argz)
                                                  : item[functionOrKey].apply(item, argz);
