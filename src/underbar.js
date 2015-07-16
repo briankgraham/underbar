@@ -340,14 +340,9 @@
   _.invoke = function(collection, functionOrKey, args) {
     var argz = Array.prototype.slice(args);
     return _.map(collection, function(item){
-      if (typeof functionOrKey === 'function'){
-        return functionOrKey.apply(item, argz); 
-      }
-      else{
-        return item[functionOrKey].apply(item, argz);
-      }
+      return typeof functionOrKey === 'function' ? functionOrKey.apply(item, argz)
+                                                 : item[functionOrKey].apply(item, argz);
     });
-
   };
 
   // Sort the object's values by a criterion produced by an iterator.
