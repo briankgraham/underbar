@@ -7,7 +7,7 @@
   // seem very useful, but remember it--if a function needs to provide an
   // iterator when the user does not pass one in, this will be handy.
   _.identity = function(val) {
-    return val;
+    return val;   
   };
 
   /**
@@ -177,8 +177,9 @@
   _.every = function(collection, iterator) {
     // TIP: Try re-using reduce() here.
     iterator = iterator || _.identity;
-    return _.reduce(collection, function(wasFound, item){
-      return !wasFound || !iterator(item) ? false : true;
+    return _.reduce(collection, function(cur, next){
+      if (iterator(next) && cur) return true;
+      else return false;
     }, true);
   };
 
@@ -264,7 +265,7 @@
       if (!alreadyCalled) {
         // TIP: .apply(this, arguments) is the standard way to pass on all of the
         // information from one function call to another.
-        result = func.apply(this, arguments);
+        result = func.call(this, arguments);
         alreadyCalled = true;
       }
       // The new function always returns the originally computed result.
@@ -284,7 +285,7 @@
     var memo = {}, argz;
     return function() {
       argz = Array.prototype.slice.call(arguments);
-      return argz in memo ? memo[argz] : memo[argz] = func.apply(this, argz); 
+      return argz in memo ? memo[argz] : memo[argz] = func.apply(this, arguments); 
     };
   };
 
@@ -315,16 +316,14 @@
   // http://mdn.io/Array.prototype.slice
   _.shuffle = function(array) {
     var newArr = array.slice(0),
-        result = [], 
         index, store;
     
-    return _.map(array, function(item){
+    return _.map(array, function(){
       index = Math.floor(Math.random() * newArr.length);
       store = newArr[index];
       newArr.splice(index, 1);
       return store;
     });
-    
   };
 
 
@@ -339,10 +338,10 @@
   // Calls the method named by functionOrKey on each value in the list.
   // Note: You will need to learn a bit about .apply to complete this.
   _.invoke = function(collection, functionOrKey, args) {
-    var argz = Array.prototype.slice(args, 2); // Whats the diff between slicing at 2 VS not including it at all? Both work...
+    //var argz = Array.prototype.slice(args);
     return _.map(collection, function(item){
-      return typeof functionOrKey === 'function' ? functionOrKey.apply(item, argz)
-                                                 : item[functionOrKey].apply(item, argz);
+      return typeof functionOrKey === 'function' ? functionOrKey.apply(item, args) 
+                                                 : item[functionOrKey](args);
     });
   };
 
@@ -351,6 +350,16 @@
   // of that string. For example, _.sortBy(people, 'name') should sort
   // an array of people by their name.
   _.sortBy = function(collection, iterator) {
+    if (typeof iterator === 'function') {
+      return collection.sort(function (a, b) {
+        return iterator(a) - iterator(b); 
+      });
+    }
+    else {
+      return collection.sort(function (a, b) {
+        return a[iterator] > b[iterator] ? 1 : -1; 
+      });
+    }
   };
 
   // Zip together two or more arrays with elements of the same index
@@ -359,6 +368,19 @@
   // Example:
   // _.zip(['a','b','c','d'], [1,2,3]) returns [['a',1], ['b',2], ['c',3], ['d',undefined]]
   _.zip = function() {
+    var result = [], store,
+        arr = Array.prototype.slice.call(arguments),
+        max = _.reduce(arr, function (cur, next) {
+          return cur.length > next.length ? cur : next;
+        });
+    for (var i = 0; i < max.length; i++) {
+      store = [];
+      for (var j = 0; j < arr.length; j++) {
+        store.push(arr[j][i]);
+      }
+      result.push(store);
+    }
+    return result;
   };
 
   // Takes a multidimensional array and converts it to a one-dimensional array.
@@ -375,11 +397,34 @@
   // Takes an arbitrary number of arrays and produces an array that contains
   // every item shared between all the passed-in arrays.
   _.intersection = function() {
+    var result = [], store,
+        arr = Array.prototype.slice.call(arguments),
+        max = _.reduce(arr, function (cur, next) {
+          return cur.length > next.length ? cur : next;
+        });
+    for (var i = 0; i < max.length; i++) {
+      store = max[i];
+      for (var j = 0; j < arr.length; j++) {
+        if (!_.contains(arr[j], store)) break;
+      }
+      if (j === arr.length) result.push(store);
+    }
+    return result;
   };
 
   // Take the difference between one array and a number of other arrays.
   // Only the elements present in just the first array will remain.
   _.difference = function(array) {
+    var result = [], store,
+        arr = Array.prototype.slice.call(arguments, 1);
+    for (var i = 0; i < array.length; i++) {
+      store = array[i];
+      for (var j = 0; j < arr.length; j++) {
+        if (_.contains(arr[j], store)) break;
+      }
+      if (j === arr.length) result.push(store);
+    }
+    return result;
   };
 
   // Returns a function, that, when invoked, will only be triggered at most once
@@ -387,6 +432,28 @@
   // on this function.
   //
   // Note: This is difficult! It may take a while to implement.
+// NEED: --> Way to see has been called and how much longer to call it
+ // if previous does not exist, the func hasnt been called, so its OK to call it, and set previous
+ // if previous exists, AND remain > wait - (now - prev), then delay Func
+ // delayFun should be a setTimeout and contain a function to apply arguments
+ // should also clearTimeout
   _.throttle = function(func, wait) {
+    var prev, delayFunc;
+
+    return function () {
+      var now = Date.now(), 
+          remain = wait - (now - prev);
+      if (prev && remain > 0) {
+        clearTimeout(delayFunc);
+        delayFunc = setTimeout(function () {
+          prev = now;
+          func.apply(this, arguments);
+        }, wait);
+      } 
+      else {
+        prev = now;
+        func.apply(this, arguments);
+      }
+    };
   };
 }());
