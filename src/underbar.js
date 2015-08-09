@@ -438,7 +438,7 @@
  // delayFun should be a setTimeout and contain a function to apply arguments
  // should also clearTimeout
   _.throttle = function(func, wait) {
-    var prev, delayFunc;
+    var prev;
 
     return function () {
       var now = Date.now(), 
