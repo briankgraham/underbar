@@ -443,17 +443,10 @@
     return function () {
       var now = Date.now(), 
           remain = wait - (now - prev);
-      if (prev && remain > 0) {
-        clearTimeout(delayFunc);
-        delayFunc = setTimeout(function () {
-          prev = now;
-          func.apply(this, arguments);
-        }, wait);
-      } 
-      else {
+      if (!(prev && remain > 0)) {
         prev = now;
         func.apply(this, arguments);
-      }
+      } 
     };
   };
 }());
